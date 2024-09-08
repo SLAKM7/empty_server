@@ -1,4 +1,4 @@
-version: v1
+version: book
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/grpc-ecosystem/grpc-gateway

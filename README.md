@@ -258,8 +258,8 @@ go install \
 [grpc](https://grpc.io/docs/languages/go/quickstart/)文档
 
 ```sh
-go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+go install google.golang.org/protobuf/cmd/protoc-gen-go@book.28
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@book.2
 ```
 
 ## 使用
@@ -282,7 +282,7 @@ service BookService {
     // 创建书籍
     rpc CreateBook (CreateBookRequest) returns (CreateBookResponse) {
         option (google.api.http) = {
-            post: "/v1/books"
+            post: "/book/books"
             body: "*"
         };
     };
@@ -290,7 +290,7 @@ service BookService {
     // 获取书籍
     rpc GetBook (GetBookRequest) returns (GetBookResponse) {
         option (google.api.http) = {
-            get: "/v1/books/{id}"
+            get: "/book/books/{id}"
         };
     }
 

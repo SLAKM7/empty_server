@@ -49,7 +49,6 @@ func Upload(w http.ResponseWriter, r *http.Request, pathParams map[string]string
 	}
 	w.Write(rb)
 	return
-
 }
 
 func Download(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {

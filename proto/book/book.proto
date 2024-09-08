@@ -16,7 +16,7 @@ service BookService {
     rpc CreateBook (CreateBookRequest) returns (CreateBookResponse) {
         option (google.api.http) = {
             // POST  /v1/books
-            post: "/v1/books"
+            post: "/book/books"
             body: "*"
         };
     };
@@ -25,7 +25,7 @@ service BookService {
     rpc GetBook (GetBookRequest) returns (GetBookResponse) {
         option (google.api.http) = {
             // GET /v1/books/1
-            get: "/v1/books/{id}",
+            get: "/book/books/{id}",
         };
     }
 

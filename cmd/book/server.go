@@ -50,7 +50,6 @@ func Run() error {
 
 func registerServer(s *grpc.Server) {
 	pb.RegisterBookServiceServer(s, service.NewBookService())
-
 }
 
 func main() {

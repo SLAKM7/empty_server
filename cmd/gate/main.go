@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	service "grpc-gateway-demo/api/gate"
 	"io"
+	"net"
 	"net/http"
 	"os"
 
@@ -13,12 +15,13 @@ import (
 	"google.golang.org/grpc/grpclog"
 
 	"grpc-gateway-demo/api/gate/middleware"
-	config "grpc-gateway-demo/bin/book"
+	config "grpc-gateway-demo/bin/gate"
 	handler "grpc-gateway-demo/internal/gate"
-	pb "grpc-gateway-demo/pkg/proto/book"
+	bookpb "grpc-gateway-demo/pkg/proto/book"
+	pb "grpc-gateway-demo/pkg/proto/gate"
 )
 
-func Run() error {
+func run() error {
 	log := grpclog.NewLoggerV2(os.Stdout, io.Discard, io.Discard)
 	grpclog.SetLoggerV2(log)
 
@@ -48,11 +51,11 @@ func Run() error {
 	}
 	mux := runtime.NewServeMux(sp...)
 
-	if err = mux.HandlePath(http.MethodPost, "/v1/objects", handler.Upload); err != nil {
+	if err = mux.HandlePath(http.MethodPost, "/book/objects", handler.Upload); err != nil {
 		return err
 	}
 
-	if err = mux.HandlePath(http.MethodGet, "/v1/objects/{name}", handler.Download); err != nil {
+	if err = mux.HandlePath(http.MethodGet, "/book/objects/{name}", handler.Download); err != nil {
 		return err
 	}
 
@@ -61,22 +64,63 @@ func Run() error {
 		log.Error("register handler failed: %v", err)
 		return err
 	}
-
-	server := http.Server{
-		Addr:    config.GetHttpAddr(), // 127.0.0.1:8002
-		Handler: mux,
-	}
-
-	log.Infof("Serving Http on %s", server.Addr)
-	err = server.ListenAndServe()
+	go newGrpcGate(log)
+	err = newGrpcHttpServer(mux, log)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+func newGrpcHttpServer(mux *runtime.ServeMux, log grpclog.LoggerV2) error {
+	server := http.Server{
+		Addr:    config.GetHttpAddr(), // 127.0.0.1:8002
+		Handler: mux,
+	}
+
+	log.Infof("Serving Http on %s", server.Addr)
+	err := server.ListenAndServe()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// newGrpcGate 启动rpc服务
+func newGrpcGate(log grpclog.LoggerV2) error {
+	// 创建grpc连接 127.0.0.1:12345
+	conn, err := grpc.NewClient(config.GetRpcAddr())
+	if err != nil {
+		log.Error("dial failed: %v", err)
+	}
+
+	client := bookpb.NewBookServiceClient(conn)
+
+	grpcAddr := config.GetRpcAddr()
+	// 127.0.0.1:12345
+	l, err := net.Listen("tcp", grpcAddr)
+	if err != nil {
+		grpclog.Errorf("tcp listen failed: %v", err)
+		return err
+	}
+	defer func() {
+		if err = l.Close(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}()
+
+	s := grpc.NewServer()
+	// 	注册服务
+	gateService := service.NewGateService(client)
+	pb.RegisterGateServer(s, gateService)
+
+	log.Infof("Serving gRPC on %s", l.Addr())
+
+	return s.Serve(l)
+}
+
 func newGateway(ctx context.Context, conn *grpc.ClientConn, mux *runtime.ServeMux) error {
-	err := pb.RegisterBookServiceHandler(ctx, mux, conn)
+	err := bookpb.RegisterBookServiceHandler(ctx, mux, conn)
 	if err != nil {
 		return err
 	}
@@ -85,7 +129,7 @@ func newGateway(ctx context.Context, conn *grpc.ClientConn, mux *runtime.ServeMu
 
 func main() {
 	// grpc 启动
-	err := Run()
+	err := run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

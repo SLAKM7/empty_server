@@ -1,10 +1,10 @@
-version: v1
+version: book
 plugins:
   - name: go
     out: gen/go
     opt:
       - paths=source_relative
-  - remote: buf.build/library/plugins/go-grpc:v1.1.0-2
+  - remote: buf.build/library/plugins/go-grpc:book.1.0-2
     out: gen/go
     opt:
       - paths=source_relative

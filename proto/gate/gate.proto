@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "/gate;";
+
+package grpc.gateway.demo.proto;
+
+// 定义服务
+service Gate {
+  // 请求
+  rpc Rpc (RpcRequest) returns (RpcResponse) {
+  };
+}
+
+message RpcRequest {
+  string service = 1;
+  string method = 2;
+  bytes data = 3;
+}
+
+message RpcResponse {
+  string code = 1;
+  bytes data = 2;
+}
