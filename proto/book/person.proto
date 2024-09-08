@@ -1,0 +1,47 @@
+// 指定proto语言版本
+syntax = "proto3";
+
+// 生成go文件的包路径
+option go_package = "/book";
+
+// proto文件包的路径
+package grpc.gateway.demo.proto;
+
+
+message Person {
+    int32 id = 1;
+    string name = 2;
+    string email = 3;
+    float salary = 4;
+    bool sex = 5;
+
+    repeated string pet = 6;
+
+    map<string, Pet > pets = 7;
+
+    Phone phone = 8;
+}
+
+message Pet {
+    int32 age = 1;
+    string name = 2;
+}
+
+
+message Phone {
+    string phone_number = 1 [json_name = "phone_number"];
+    PhoneType phone_type = 2;
+}
+
+enum PhoneType {
+    PHONE_TYPE_UNSPECIFIED = 0;
+    PHONE_TYPE_WORK = 1;
+    PHONE_TYPE_HOME = 2;
+}
+
+
+
+
+
+
+

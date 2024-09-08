@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+option go_package = "/book;";
+
+package grpc.gateway.demo.proto;
+
+import "google/api/annotations.proto";
+
+// 导入api注释依赖
+
+
+
+// 定义服务
+service BookService {
+    // 创建书籍
+    rpc CreateBook (CreateBookRequest) returns (CreateBookResponse) {
+        option (google.api.http) = {
+            // POST  /v1/books
+            post: "/v1/books"
+            body: "*"
+        };
+    };
+
+    // 获取书籍
+    rpc GetBook (GetBookRequest) returns (GetBookResponse) {
+        option (google.api.http) = {
+            // GET /v1/books/1
+            get: "/v1/books/{id}",
+        };
+    }
+
+    //    rpc UpdateBook (UpdateBookRequest) returns (UpdateBookResponse) {
+    //
+    //    };
+    //
+    //
+    //    rpc DeleteBook (DeleteBookRequest) returns (DeleteBookResponse) {
+    //
+    //    };
+    //
+    //    rpc ListBook (ListBookRequest) returns (ListBookResponse) {};
+
+}
+
+message Book {
+    // int64 会自动转换为string 进行返回
+    int32 id = 1;
+    string name = 2;
+
+}
+
+// 定义接收参数
+message CreateBookRequest {
+    string name = 1;
+}
+
+
+message CreateBookResponse {
+    string code = 1;
+    string message = 2;
+    Book data = 3;
+}
+
+
+message GetBookRequest {
+    int32 id = 1;
+}
+
+
+message GetBookResponse {
+    string code = 1;
+    string message = 2;
+    Book data = 3;
+}
