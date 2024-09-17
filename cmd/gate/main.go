@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 
 	"grpc-gateway-demo/api/gate/middleware"
+	bookconfig "grpc-gateway-demo/bin/book"
 	config "grpc-gateway-demo/bin/gate"
 	handler "grpc-gateway-demo/internal/gate"
 	bookpb "grpc-gateway-demo/pkg/proto/book"
@@ -88,10 +89,11 @@ func newGrpcHttpServer(mux *runtime.ServeMux, log grpclog.LoggerV2) error {
 
 // newGrpcGate 启动rpc服务
 func newGrpcGate(log grpclog.LoggerV2) error {
-	// 创建grpc连接 127.0.0.1:12345
-	conn, err := grpc.NewClient(config.GetRpcAddr())
+	conn, err := grpc.NewClient(bookconfig.GetRpcAddr(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(10*1024*1024))) // 设置最大接收消息大小为 10MB)
 	if err != nil {
-		log.Error("dial failed: %v", err)
+		log.Fatalf("dial failed: %v", err)
 	}
 
 	client := bookpb.NewBookServiceClient(conn)

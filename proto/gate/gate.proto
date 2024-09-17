@@ -12,12 +12,11 @@ service Gate {
 }
 
 message RpcRequest {
-  string service = 1;
-  string method = 2;
-  bytes data = 3;
+  string service = 1; // 请求服务
+  string method = 2;  // 请求方法
+  bytes data = 3; // 请求 proto 序列化数据
 }
 
 message RpcResponse {
-  string code = 1;
-  bytes data = 2;
+  bytes data = 1; // 返回数据
 }
